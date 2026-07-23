@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini-Docker Desktop</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="glass-container">
+        <header style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Mini-Docker <span>Desktop</span></h1>
+                <p>Control Panel</p>
+            </div>
+            <button id="shutdownBtn" style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; transition: all 0.3s ease;">Stop Service</button>
+        </header>
+        <main>
+            <section class="run-container">
+                <h2>Launch New Container</h2>
+                <form id="runForm">
+                    <div class="input-group">
+                        <label for="cmd">Command</label>
+                        <input type="text" id="cmd" placeholder="e.g. /bin/sh -c 'sleep 100'" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="env">Environment (KEY=VAL)</label>
+                        <input type="text" id="env" placeholder="e.g. PORT=8080">
+                    </div>
+                    <div class="input-group">
+                        <label for="vol">Volume (host:container)</label>
+                        <input type="text" id="vol" placeholder="e.g. /home/kali:/data">
+                    </div>
+                    <button type="submit" class="glow-on-hover">Run Container</button>
+                </form>
+            </section>
+
+            <section class="active-containers">
+                <h2>Active Containers</h2>
+                <div class="table-wrapper">
+                    <table id="containersTable">
+                        <thead>
+                            <tr>
+                                <th>PID</th>
+                                <th>Command</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

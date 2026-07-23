@@ -1,0 +1,104 @@
+======================================================
+     HOJA DE TRUCOS: COMANDOS DE MINI-DOCKER
+======================================================
+
+1. PREPARACIÓN DESDE WINDOWS
+------------------------------------------------------
+Compilar el código fuente en Go para que funcione en Linux:
+  set GOOS=linux
+  go build -o mini-docker
+
+Servidor temporal para transferir archivos a Kali:
+  php -S 0.0.0.0:8000
+
+
+2. DESCARGAR Y CONFIGURAR EN KALI LINUX
+------------------------------------------------------
+Descargar y ejecutar script que prepara el sistema base aislado (RootFS):
+  wget -O setup-rootfs.sh http://10.0.2.2:8000/setup-rootfs.sh
+  chmod +x setup-rootfs.sh
+  sudo ./setup-rootfs.sh
+
+Descargar el motor principal (mini-docker) y los archivos de la Interfaz Web:
+  rm -f mini-docker
+  wget http://10.0.2.2:8000/mini-docker
+  chmod +x mini-docker
+
+  mkdir -p ui
+  wget -O ui/index.html http://10.0.2.2:8000/ui/index.html
+  wget -O ui/style.css http://10.0.2.2:8000/ui/style.css
+  wget -O ui/app.js http://10.0.2.2:8000/ui/app.js
+
+
+3. USO: MODO TERMINAL (INTERACTIVO)
+------------------------------------------------------
+Levantar una terminal aislada simple:
+  sudo ./mini-docker run /bin/sh
+
+Levantar una terminal inyectando variables y montando carpetas:
+  sudo ./mini-docker run -e SECRETO=123 -v /home/kali:/shared /bin/sh
+
+Levantar una terminal con permisos gráficos (X11) para ver ventanas en Kali:
+  xhost +local:
+  sudo ./mini-docker run -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY /bin/sh
+
+
+4. USO: MODO INTERFAZ GRÁFICA (UI DOCKER DESKTOP)
+------------------------------------------------------
+Encender el servidor backend de la Interfaz Web:
+  sudo ./mini-docker ui
+
+Una vez encendido, abre el navegador en Kali en:
+  http://localhost:9000
+
+
+5. EJEMPLOS DE COMANDOS PARA EJECUTAR EN LA INTERFAZ WEB
+------------------------------------------------------
+Ejemplo 1: Dejar un proceso en espera (ideal para ver que aparece en la tabla)
+  Command: sleep 1000
+
+Ejemplo 2: Escribir archivo con secretos a una carpeta montada
+  Volume:  /home/kali:/shared
+  Env:     SECRETO=mipassword
+  Command: echo "Mi clave es" $SECRETO > /shared/prueba.txt
+
+Ejemplo 3: Levantar un Servidor Web Python sirviendo tus archivos
+  Volume:  /home/kali:/shared
+  Command: python3 -m http.server 8080 -d /shared
+  (Luego puedes visitar http://localhost:8080 en el navegador de Kali)
+
+
+6. COMANDOS ÚTILES PARA COMPROBAR RESULTADOS
+------------------------------------------------------
+IMPORTANTE: Debes prestar atención a tu terminal para saber en qué "mundo" estás antes de escribir un comando.
+
+>> MUNDO REAL (Tu terminal dice algo como: ┌──(root㉿kali)-[/home/kali])
+Estos comandos se ejecutan en tu máquina anfitriona (fuera del contenedor):
+
+- Ver si el contenedor generó un archivo en tu carpeta compartida:
+  cat /home/kali/prueba.txt
+
+- Encender el panel de control web:
+  sudo ./mini-docker ui (Ciérralo presionando Ctrl + C)
+
+- Levantar una terminal interactiva (para viajar al mundo aislado):
+  sudo ./mini-docker run /bin/sh
+
+
+>> MUNDO AISLADO (Tu terminal cambia y ahora solo dice: / #)
+Estos comandos se ejecutan ÚNICAMENTE cuando estás dentro de un contenedor:
+
+- Comprobar que el aislamiento de red funciona (el nombre del equipo cambia):
+  hostname
+  (En lugar de decir 'kali', el contenedor responderá 'minidocker')
+
+- Comprobar el aislamiento de procesos (los PIDs se ocultan):
+  ps aux
+  (Verás que el contenedor se cree que es el único proceso existiendo, y se asignó el PID 1)
+
+- Descargar e instalar programas desde internet:
+  apk update
+  apk add xclock python3
+
+- Destruir el contenedor y volver a tu máquina real:
+  exit
